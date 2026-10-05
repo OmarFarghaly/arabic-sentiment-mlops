@@ -1,0 +1,17 @@
+base:
+  seed: 42
+
+prepare:
+  test_size: 0.2
+  output_dir: "data/processed"
+
+train:
+  model_name: "aubmindlab/bert-base-arabertv02"
+  batch_size: 16
+  epochs: 3
+  learning_rate: 2e-5
+  max_length: 128
+  model_output_dir: "models/sentiment_bert"
+
+evaluate:
+  metrics_path: "metrics.json"

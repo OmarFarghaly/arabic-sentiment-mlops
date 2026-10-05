@@ -1,0 +1,37 @@
+stages:
+  prepare:
+    cmd: uv run python src/arabic_sentiment_mlops/prepare.py
+    deps:
+      - data/raw
+      - src/arabic_sentiment_mlops/prepare.py
+    params:
+      - base.seed
+      - prepare.output_dir
+    outs:
+      - data/processed/train.csv
+      - data/processed/test.csv
+
+  train:
+    cmd: uv run python src/arabic_sentiment_mlops/train.py
+    deps:
+      - data/processed/train.csv
+      - src/arabic_sentiment_mlops/train.py
+    params:
+      - base.seed
+      - train.model_name
+      - train.batch_size
+      - train.epochs
+      - train.learning_rate
+      - train.max_length
+    outs:
+      - models/sentiment_bert
+
+  evaluate:
+    cmd: uv run python src/arabic_sentiment_mlops/evaluate.py
+    deps:
+      - data/processed/test.csv
+      - models/sentiment_bert
+      - src/arabic_sentiment_mlops/evaluate.py
+    metrics:
+      - metrics.json:
+          cache: false
