@@ -1,0 +1,63 @@
+schema: '2.0'
+stages:
+  prepare:
+    cmd: uv run python scripts/prepare.py
+    deps:
+    - path: data/raw
+      hash: md5
+      md5: ba3d0849e662761f1e5a25c37b2d1d83.dir
+      size: 7369776
+      nfiles: 4
+    - path: scripts/prepare.py
+      hash: md5
+      md5: aa4e5e30ed58207e45d7773107383577
+      size: 1456
+    params:
+      params.yaml:
+        base.seed: 42
+        prepare.output_dir: data/processed
+    outs:
+    - path: data/processed/test.csv
+      hash: md5
+      md5: 37cb7006e1f38581b3dd3c9e0babba15
+      size: 1531014
+    - path: data/processed/train.csv
+      hash: md5
+      md5: 2447b7dbaa7586fae22c4004d2ef8ed9
+      size: 6128504
+  train:
+    cmd: uv run python src/arabic_sentiment_mlops/train.py
+    deps:
+    - path: data/processed/train.csv
+      hash: md5
+      md5: 2447b7dbaa7586fae22c4004d2ef8ed9
+      size: 6128504
+    - path: pyproject.toml
+      hash: md5
+      md5: 86026cb68118c44766b5cac536eaf225
+      size: 790
+    - path: src/arabic_sentiment_mlops/train.py
+      hash: md5
+      md5: 59cd791f91cfb2928b197c75d8bac99e
+      size: 4486
+    - path: uv.lock
+      hash: md5
+      md5: ffb3c5fb27f696dd758aa3bd1fa1c11f
+      size: 682788
+    params:
+      params.yaml:
+        base.seed: 42
+        prepare.output_dir: data/processed
+        train.batch_size: 16
+        train.epochs: 3
+        train.learning_rate: 2e-05
+        train.max_length: 128
+        train.model_name: aubmindlab/bert-base-arabertv02
+        train.model_output_dir: models/sentiment_bert
+        train.validation_size: 0.2
+    outs:
+    - path: models/sentiment_bert
+      hash: md5
+      md5: 18328d296cef0d40234fe276c09b2e38.dir
+      size: 3791300110
+      nfiles: 25

@@ -1,9 +1,9 @@
 stages:
   prepare:
-    cmd: uv run python src/arabic_sentiment_mlops/prepare.py
+    cmd: uv run python scripts/prepare.py
     deps:
       - data/raw
-      - src/arabic_sentiment_mlops/prepare.py
+      - scripts/prepare.py
     params:
       - base.seed
       - prepare.output_dir
@@ -16,13 +16,18 @@ stages:
     deps:
       - data/processed/train.csv
       - src/arabic_sentiment_mlops/train.py
+      - pyproject.toml
+      - uv.lock
     params:
       - base.seed
+      - prepare.output_dir
       - train.model_name
       - train.batch_size
       - train.epochs
       - train.learning_rate
       - train.max_length
+      - train.validation_size
+      - train.model_output_dir
     outs:
       - models/sentiment_bert
 

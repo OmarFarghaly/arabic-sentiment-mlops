@@ -2,7 +2,6 @@ base:
   seed: 42
 
 prepare:
-  test_size: 0.2
   output_dir: "data/processed"
 
 train:
@@ -11,6 +10,7 @@ train:
   epochs: 3
   learning_rate: 2e-5
   max_length: 128
+  validation_size: 0.2
   model_output_dir: "models/sentiment_bert"
 
 evaluate:
