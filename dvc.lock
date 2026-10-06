@@ -50,7 +50,7 @@ stages:
         prepare.output_dir: data/processed
         train.batch_size: 16
         train.epochs: 3
-        train.learning_rate: 2e-05
+        train.learning_rate: 3e-05
         train.max_length: 128
         train.model_name: aubmindlab/bert-base-arabertv02
         train.model_output_dir: models/sentiment_bert
@@ -58,6 +58,6 @@ stages:
     outs:
     - path: models/sentiment_bert
       hash: md5
-      md5: 18328d296cef0d40234fe276c09b2e38.dir
-      size: 3791300110
+      md5: 2b19de5a4fb215960f3e92004b41c3ff.dir
+      size: 3791300136
       nfiles: 25
