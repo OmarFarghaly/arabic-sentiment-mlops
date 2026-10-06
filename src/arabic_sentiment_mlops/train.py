@@ -1,5 +1,6 @@
 from pathlib import Path
-
+from arabic_sentiment_mlops.tracking import ExperimentTracker
+import hashlib
 import pandas as pd
 import yaml
 from datasets import Dataset
@@ -135,7 +136,44 @@ def main():
         compute_metrics=compute_metrics,
     )
 
-    trainer.train()
+    tracker = ExperimentTracker()
+
+    with tracker.start_run() as run:
+        print(f"MLflow run ID: {run.info.run_id}")
+
+        tracker.log_params({
+            **config,
+            "learning_rate": float(config["learning_rate"]),
+            "seed": seed,
+            "train_rows": len(training_frame),
+            "validation_rows": len(validation_frame),
+            "train_data_sha256": hashlib.sha256(
+                data_path.read_bytes()
+            ).hexdigest(),
+        })
+
+        trainer.add_callback(MLflowEpochCallback())
+        trainer.train()
+        trainer.remove_callback(MLflowEpochCallback)
+
+        # Trainer restores the checkpoint with the best validation macro F1.
+        trainer.save_model(str(output_dir))
+        tokenizer.save_pretrained(str(output_dir))
+
+        validation_metrics = trainer.evaluate()
+        trainer.save_metrics("validation", validation_metrics)
+        tracker.log_validation(validation_metrics)
+
+        tracker.log_model(
+            model=trainer.model,
+            tokenizer=tokenizer,
+            output_dir=output_dir,
+            max_length=config["max_length"],
+            batch_size=config["batch_size"],
+        )
+
+        print(f"Saved model and tokenizer to {output_dir}")
+        print(validation_metrics)
 
     # Training restores the checkpoint with the highest validation macro F1.
     trainer.save_model(str(output_dir))

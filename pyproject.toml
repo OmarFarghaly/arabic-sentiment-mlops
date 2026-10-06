@@ -11,8 +11,11 @@ dependencies = [
     "accelerate>=1.1.0",
     "datasets>=5.0.1",
     "fastapi>=0.142.2",
+    "matplotlib>=3.11.2",
+    "mlflow>=3.16.1",
     "pandas>=3.0.6",
     "pydantic>=2.0",
+    "pyyaml>=6.0.3",
     "scikit-learn>=1.9.1",
     "torch>=2.7.1",
     "transformers>=5.18.0",
@@ -38,3 +41,7 @@ torch = { index = "pytorch" }
 name = "pytorch"
 url = "https://download.pytorch.org/whl/cu128"
 explicit = true
+
+
+[tool.uv]
+system-certs = true

@@ -14,10 +14,12 @@ stages:
   train:
     cmd: uv run python src/arabic_sentiment_mlops/train.py
     deps:
+      - src/arabic_sentiment_mlops/callbacks.py
       - data/processed/train.csv
       - src/arabic_sentiment_mlops/train.py
       - pyproject.toml
       - uv.lock
+      - src/arabic_sentiment_mlops/tracking.py
     params:
       - base.seed
       - prepare.output_dir
@@ -37,6 +39,12 @@ stages:
       - data/processed/test.csv
       - models/sentiment_bert
       - src/arabic_sentiment_mlops/evaluate.py
+      - pyproject.toml
+      - uv.lock
+    params:
+      - prepare.output_dir
+      - train.model_output_dir
+      - evaluate.metrics_path
     metrics:
       - metrics.json:
           cache: false
