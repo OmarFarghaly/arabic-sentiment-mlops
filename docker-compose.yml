@@ -3,7 +3,7 @@ services:
     image: arabic-sentiment-api:local
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: dockerfile
     ports:
       - "127.0.0.1:8000:8000"
     restart: unless-stopped
