@@ -1,7 +1,9 @@
 from dataclasses import dataclass
 
+import mlflow
+import mlflow.pytorch
 import torch
-from transformers import AutoModelForSequenceClassification, AutoTokenizer
+from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
 
 @dataclass
@@ -11,20 +13,54 @@ class Prediction:
 
 
 class ArabicSentimentModel:
-    def __init__(self, model_name: str = "asafaya/bert-mini-arabic"):
+    def __init__(
+        self,
+        model_name="ArabicSentiment",
+        alias="production",
+        tracking_uri="http://127.0.0.1:5000",
+        ):
+
         self.model_name = model_name
+        self.alias = alias
+        self.tracking_uri = tracking_uri
         self.tokenizer = None
         self.model = None
+        self.max_length = None
 
     def load(self) -> None:
-        self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
+        mlflow.set_tracking_uri(self.tracking_uri)
+        mlflow.set_registry_uri(self.tracking_uri)
 
-        self.model = AutoModelForSequenceClassification.from_pretrained(
+        client = mlflow.MlflowClient()
+        version = client.get_model_version_by_alias(
             self.model_name,
-            num_labels=3,
+            self.alias,
         )
 
-        self.model.eval()
+        # Resolve production once, then use the exact version so the
+        # model and tokenizer cannot come from different promotions.
+        model_uri = f"models:/{self.model_name}/{version.version}"
+        run = client.get_run(version.run_id)
+
+        tokenizer_dir = mlflow.artifacts.download_artifacts(
+            artifact_uri=f"runs:/{version.run_id}/tokenizer",
+        )
+
+        tokenizer = AutoTokenizer.from_pretrained(tokenizer_dir)
+        model = mlflow.pytorch.load_model(
+            model_uri,
+            map_location="cpu",
+        )
+        model.eval()
+
+        self.max_length = int(run.data.params["max_length"])
+        self.tokenizer = tokenizer
+        self.model = model
+
+        print(
+            f"Loaded {self.model_name}@{self.alias}, "
+            f"version {version.version}"
+        )
 
     def predict(self, text: str) -> Prediction:
         return self.predict_batch([text])[0]
@@ -37,7 +73,7 @@ class ArabicSentimentModel:
             texts,
             padding=True,
             truncation=True,
-            max_length=128,
+            max_length=self.max_length,
             return_tensors="pt",
         )
 
@@ -47,11 +83,9 @@ class ArabicSentimentModel:
         probabilities = torch.softmax(output.logits, dim=-1)
         confidences, ids = probabilities.max(dim=-1)
 
-        labels = ["negative", "neutral", "positive"]
-
         return [
             Prediction(
-                label=labels[class_id.item()],
+                label=self.model.config.id2label[class_id.item()],
                 confidence=confidence.item(),
             )
             for class_id, confidence in zip(ids, confidences)

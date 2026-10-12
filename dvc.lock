@@ -34,23 +34,31 @@ stages:
       size: 6128504
     - path: pyproject.toml
       hash: md5
-      md5: 86026cb68118c44766b5cac536eaf225
-      size: 790
+      md5: f8083e3b4aca3a9aba44759706d1d2b8
+      size: 968
+    - path: src/arabic_sentiment_mlops/callbacks.py
+      hash: md5
+      md5: c65b1511171016b03410204df1e7b0a2
+      size: 762
+    - path: src/arabic_sentiment_mlops/tracking.py
+      hash: md5
+      md5: 12d6edfe057ef4a4ef249810ec5d2a97
+      size: 3040
     - path: src/arabic_sentiment_mlops/train.py
       hash: md5
-      md5: 59cd791f91cfb2928b197c75d8bac99e
-      size: 4486
+      md5: c798faf488a73b2a31476537b788b407
+      size: 5561
     - path: uv.lock
       hash: md5
-      md5: ffb3c5fb27f696dd758aa3bd1fa1c11f
-      size: 682788
+      md5: 40848c396c8139617273cd040ed711b0
+      size: 847680
     params:
       params.yaml:
         base.seed: 42
         prepare.output_dir: data/processed
         train.batch_size: 16
         train.epochs: 3
-        train.learning_rate: 3e-05
+        train.learning_rate: 4e-05
         train.max_length: 128
         train.model_name: aubmindlab/bert-base-arabertv02
         train.model_output_dir: models/sentiment_bert
@@ -58,6 +66,40 @@ stages:
     outs:
     - path: models/sentiment_bert
       hash: md5
-      md5: 2b19de5a4fb215960f3e92004b41c3ff.dir
-      size: 3791300136
-      nfiles: 25
+      md5: 3fbd45a820b34774c2aba2d49201130e.dir
+      size: 3791300371
+      nfiles: 26
+  evaluate:
+    cmd: uv run python src/arabic_sentiment_mlops/evaluate.py
+    deps:
+    - path: data/processed/test.csv
+      hash: md5
+      md5: 37cb7006e1f38581b3dd3c9e0babba15
+      size: 1531014
+    - path: models/sentiment_bert
+      hash: md5
+      md5: 3fbd45a820b34774c2aba2d49201130e.dir
+      size: 3791300371
+      nfiles: 26
+    - path: pyproject.toml
+      hash: md5
+      md5: f8083e3b4aca3a9aba44759706d1d2b8
+      size: 968
+    - path: src/arabic_sentiment_mlops/evaluate.py
+      hash: md5
+      md5: 47a7b9f6a452b5a12477f1a1bd960d97
+      size: 5633
+    - path: uv.lock
+      hash: md5
+      md5: 40848c396c8139617273cd040ed711b0
+      size: 847680
+    params:
+      params.yaml:
+        evaluate.metrics_path: metrics.json
+        prepare.output_dir: data/processed
+        train.model_output_dir: models/sentiment_bert
+    outs:
+    - path: metrics.json
+      hash: md5
+      md5: 7b0ad9aa0710477dda7a80fc5b64f6d1
+      size: 83

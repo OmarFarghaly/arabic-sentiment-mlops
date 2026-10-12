@@ -38,6 +38,7 @@ class ExperimentTracker:
         model_info = mlflow.pytorch.log_model(
             pytorch_model=model.cpu(),
             name="model",
+            serialization_format="pickle",
             extra_pip_requirements=[
                 f"transformers=={transformers.__version__}",
             ],
@@ -50,12 +51,26 @@ class ExperimentTracker:
                 artifact_path="tokenizer",
             )
 
+            version = mlflow.register_model(
+            model_uri=model_info.model_uri,
+            name="ArabicSentiment",
+            )
+
+        client = mlflow.MlflowClient()
+        client.set_registered_model_alias(
+            name="ArabicSentiment",
+            alias="staging",
+            version=version.version,
+        )
+
         metadata = {
             "run_id": run.info.run_id,
             "tracking_uri": self.tracking_uri,
             "model_uri": model_info.model_uri,
             "max_length": max_length,
             "batch_size": batch_size,
+            "registered_model_name": "ArabicSentiment",
+            "registered_model_version": str(version.version),
         }
 
         metadata_path = Path(output_dir) / "mlflow_run.json"

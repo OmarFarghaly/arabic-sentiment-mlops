@@ -1,5 +1,8 @@
 from pathlib import Path
 from arabic_sentiment_mlops.tracking import ExperimentTracker
+from arabic_sentiment_mlops.callbacks import MLflowEpochCallback
+
+
 import hashlib
 import pandas as pd
 import yaml
@@ -174,17 +177,6 @@ def main():
 
         print(f"Saved model and tokenizer to {output_dir}")
         print(validation_metrics)
-
-    # Training restores the checkpoint with the highest validation macro F1.
-    trainer.save_model(str(output_dir))
-    tokenizer.save_pretrained(str(output_dir))
-
-    validation_metrics = trainer.evaluate()
-    trainer.save_metrics("validation", validation_metrics)
-
-    print(f"Saved model and tokenizer to {output_dir}")
-    print(validation_metrics)
-
 
 if __name__ == "__main__":
     main()
