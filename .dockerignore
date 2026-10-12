@@ -1,0 +1,15 @@
+**
+!Dockerfile
+!.dockerignore
+!pyproject.toml
+!README.md
+!src/
+!src/**
+!models/
+!models/production/
+!models/production/**
+!certs/
+!certs/network-root.crt
+
+**/__pycache__/
+**/*.pyc
