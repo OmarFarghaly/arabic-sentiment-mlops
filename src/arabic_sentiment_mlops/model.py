@@ -3,6 +3,9 @@ from dataclasses import dataclass
 import mlflow
 import mlflow.pytorch
 import torch
+import json
+import os
+from pathlib import Path
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
 
@@ -27,7 +30,36 @@ class ArabicSentimentModel:
         self.model = None
         self.max_length = None
 
+    def load_export(self, model_dir):
+        model_dir = Path(model_dir)
+        metadata = json.loads(
+            (model_dir / "production.json").read_text(encoding="utf-8")
+        )
+
+        tokenizer = AutoTokenizer.from_pretrained(
+            model_dir,
+            local_files_only=True,
+        )
+        model = AutoModelForSequenceClassification.from_pretrained(
+            model_dir,
+            local_files_only=True,
+        )
+        model.eval()
+
+        self.max_length = int(metadata["max_length"])
+        self.tokenizer = tokenizer
+        self.model = model
+
+        print(
+            "Loaded exported production version "
+            f"{metadata['registered_model_version']}"
+        )
+    
     def load(self) -> None:
+        model_dir = os.environ.get("MODEL_DIR")
+        if model_dir:
+            self.load_export(model_dir)
+            return
         mlflow.set_tracking_uri(self.tracking_uri)
         mlflow.set_registry_uri(self.tracking_uri)
 
