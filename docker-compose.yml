@@ -1,6 +1,8 @@
 services:
   api:
-    image: arabic-sentiment-api:local
+    image:
+      arabic-sentiment-api:local
+    cpus: 2.0
     build:
       context: .
       dockerfile: Dockerfile

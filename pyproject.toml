@@ -29,6 +29,7 @@ build-backend = "uv_build"
 [dependency-groups]
 dev = [
     "dvc[gdrive]>=3.67.1",
+    "locust>=2.46.7",
     "pyopenssl>=25",
     "pytest>=9.1.1",
     "pytest-cov>=7.1.0",

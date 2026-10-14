@@ -26,3 +26,23 @@ Training run
                       └─ promote.py checks its score
                            └─ production points to the approved version
                                 └─ API loads it on startup
+
+
+
+
+
+After downloading the tar.file:
+     1. docker load --input "C:\path\to\arabic-sentiment-api.tar"
+     2. docker compose up
+     3. Invoke-RestMethod http://localhost:8000/health --> Test
+     
+
+
+
+
+To run the load Test on the App using locust:
+     New-Item -ItemType Directory -Force reports | Out-Null
+     uv run locust --config locust.conf
+
+To see the results:
+     Start-Process reports/locust_fastapi.html
